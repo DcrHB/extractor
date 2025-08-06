@@ -1856,18 +1856,19 @@ class ArchiveDirectoryHandler:
         total_handled_size = (handled_size + extra_handled_size)
         total_unmatched_size = unmatched_size - extra_handled_size
         found_pac = False
+        coverage_limit = 0.80
         for handler in handlers_found_pass1:
             if isinstance(handler, PacHandler):
                 found_pac = True
         logging.info("PASS1: total_handled_size=%r  total_unmatched_size=%r  ignored_archive_size=%r  found_system_img=%r  found_vendor_img=%r", total_handled_size, total_unmatched_size, ignored_archive_size, found_system_img, found_vendor_img)
-        if total_handled_size >= 0.85 * (handled_size + total_unmatched_size) or (total_handled_size > 0 and ignore_size_coverage):
+        if total_handled_size >= coverage_limit * (handled_size + total_unmatched_size) or (total_handled_size > 0 and ignore_size_coverage):
             return handlers_found_pass1
-        elif found_system_img and found_vendor_img and total_handled_size > 0.80 * (handled_size + total_unmatched_size - ignored_archive_size):
+        elif found_system_img and found_vendor_img and total_handled_size > coverage_limit * (handled_size + total_unmatched_size - ignored_archive_size):
             # Some firmwares contain a second copy of the firmware within an archive (tar/tar.gz/...).
             # If we have a system/vendor image, we can check if 85% of the total size is covered while ignoring
             # additional archives.
             return handlers_found_pass1
-        elif found_pac and total_handled_size > 0.85 * (handled_size + total_unmatched_size - ignored_archive_size):
+        elif found_pac and total_handled_size > coverage_limit * (handled_size + total_unmatched_size - ignored_archive_size):
             # Some firmwares contain a second copy of the firmware within an archive (tar/tar.gz/...).
             # If we have a PAC image, we can check if 85% of the total size is covered while ignoring
             # additional archives.
